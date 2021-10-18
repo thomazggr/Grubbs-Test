@@ -1,5 +1,4 @@
 from numpy import square, sqrt
-from pandas import DataFrame
 from scipy.stats import t
 from statistics import mean as mn
 from statistics import stdev as stdev
@@ -30,13 +29,13 @@ class Grubbs:
         self.critical = "Critical Value(λ): {}".format(crit)
 
         if samples:
-            results["Samples"] = samples
+            results["samples"] = samples
         else:
             pass
 
         if remove:
             rmvd = [x if x is not False and y == "No" else "-"
-                    for x, y in zip(results["Values"], results["Outlier?"])]
+                    for x, y in zip(results["values"], results["outlier"])]
             if "-" in rmvd:
                 rmvd.remove("-")
             else:
@@ -45,15 +44,16 @@ class Grubbs:
             self.keeps = rmvd
         else:
             pass
+
         self.results = results
 
-        if results["Outlier?"].value_counts()["Yes"] == 0:
+        if results["outlier"].count("Yes") == 0:
             self.outliers = "There are no outliers between all samples"
-        elif results["Outlier?"].value_counts()["Yes"] == 1:
+        elif results["outlier"].count("Yes") == 1:
             self.outliers = "There is 1 outlier between all samples"
         else:
             self.outliers = "There are {} outliers between all samples" \
-                .format(results["Outlier?"].value_counts()["Yes"])
+                .format(results["outlier"].count("Yes"))
         pass
 
     @staticmethod
@@ -98,5 +98,9 @@ class Grubbs:
         std = stdev(vals)
         zis = [(abs(mean - v) / std) for v in vals]
         otls = ["No" if z < crit else "Yes" for z in zis]
-        results = DataFrame(data={"Values": vals, "Z-score": zis, "Outlier?": otls})
+        results = {
+            "values": vals,
+            "zscore": zis,
+            "outlier":otls
+        }
         return results, mean, std, crit
